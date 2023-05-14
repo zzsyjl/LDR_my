@@ -13,7 +13,7 @@ from mcrgan.default import _C as config
 
 def generate_subset(dataset_name, root_dir='./data', train=True, transform=None, num_samples_per_class=200):
     # Load the full dataset
-    if dataset_name.lower() == 'CIFAR10':
+    if dataset_name.lower() == 'cifar10':
         full_dataset = CIFAR10(root=root_dir, train=train,
                                download=True, transform=transform)
     elif dataset_name == 'mnist':
@@ -118,6 +118,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--dataset')
+    parser.add_argument('--ckpt_path')
     args = parser.parse_args()
     transform = transforms.Compose(
             [transforms.Resize(32),
@@ -128,9 +129,11 @@ if __name__ == '__main__':
 
     # Define models and optimizers
     netD, netG = get_models(args.dataset, device)
-    if args.dataset == 'mnist':
+    if args.ckpt_path is not None:
+        netd_ckpt = args.ckpt_path
+    elif args.dataset == 'mnist':
         netd_ckpt = "logs/mnist_LDR_multi/checkpoints/netD/netD_4500_steps.pth"
-    if args.dataset == 'cifar10':
+    elif args.dataset == 'cifar10':
         netd_ckpt = "logs/cifar10_LDR_multi_mini_dcgan/checkpoints/netD/netD_45000_steps.pth"
     netD_state_dict = torch.load(netd_ckpt)
 
