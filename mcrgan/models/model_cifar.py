@@ -178,7 +178,9 @@ class GeneratorCIFAR(dcgan_base.DCGANBaseGenerator):
         elif cfg.MODEL.INIT == 'kaiming':
             pass
         else:
-            raise ValueError
+            # raise ValueError
+            # use mini_dcgan as default
+            self.main.apply(weights_init_mnist_model)
 
     def forward(self, x):
 
