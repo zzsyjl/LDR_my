@@ -240,6 +240,11 @@ def get_cifar_model():
         netD = Discriminator(128)
 
     else:
-        raise ValueError()
+        # raise ValueError()
+        # use mini_dcgan as default
+        print("building the mini_dcgan model...")
+        netG = GeneratorCIFAR(nz=cfg.MODEL.NZ, ngf=cfg.MODEL.NGF)
+        # netG = GeneratorCIFAR(nz=cfg.MODEL.NZ, ngf=128)
+        netD = DiscriminatorCIFAR(nz=cfg.MODEL.NZ, ndf=cfg.MODEL.NDF)
 
     return netG, netD
