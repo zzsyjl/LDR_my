@@ -1,0 +1,8 @@
+.idea/
+.DS_Store
+nohup.out
+.vscode
+data
+logs
+cifar10
+mnist
