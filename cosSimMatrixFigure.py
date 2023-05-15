@@ -6,9 +6,12 @@ from torchvision.datasets import CIFAR10, MNIST
 import matplotlib.pyplot as plt
 from torch import nn
 import argparse
+import os
 
+from mcrgan.default import update_config
 from mcrgan.models import get_models
 from mcrgan.default import _C as config
+from test_acc import parse_args
 
 
 def generate_subset(dataset_name, root_dir='./data', train=True, transform=None, num_samples_per_class=200):
@@ -115,28 +118,19 @@ def plot_cosine_similarity_matrix(subset_similarity_matrix, pic_tag):
     
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    args = parse_args()
+    root = os.path.dirname(args.cfg)
+    netd_ckpt = f"{root}/checkpoints/netD/netD_{args.ckpt_epochs}_steps.pth"
 
-    parser.add_argument('--dataset')
-    parser.add_argument('--ckpt_path')
-    args = parser.parse_args()
     transform = transforms.Compose(
             [transforms.Resize(32),
              transforms.ToTensor(),
              transforms.Normalize(0.5, 0.5)])
     device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
-    subset_dataset = generate_subset(dataset_name=args.dataset, train=True, transform=transform, num_samples_per_class=200)
+    subset_dataset = generate_subset(dataset_name=config.DATA.DATASET, train=True, transform=transform, num_samples_per_class=200)
 
-    # Define models and optimizers
-    netD, netG = get_models(args.dataset, device)
-    if args.ckpt_path is not None:
-        netd_ckpt = args.ckpt_path
-    elif args.dataset == 'mnist':
-        netd_ckpt = "logs/mnist_LDR_multi/checkpoints/netD/netD_4500_steps.pth"
-    elif args.dataset == 'cifar10':
-        netd_ckpt = "logs/cifar10_LDR_multi_mini_dcgan/checkpoints/netD/netD_45000_steps.pth"
+    netD, _ = get_models(config.DATA.DATASET, device)
     netD_state_dict = torch.load(netd_ckpt)
-
     netD.module.load_state_dict(netD_state_dict["model_state_dict"])
     netD.cuda()
 
@@ -147,7 +141,7 @@ if __name__ == '__main__':
     print(np.histogram(similarity_matrix, bins=10))
 
     # Plot the cosine similarity matrix
-    plot_cosine_similarity_matrix(similarity_matrix, f'{args.dataset}_ictrl')
+    plot_cosine_similarity_matrix(similarity_matrix, f'{config.DATA.DATASET}_ictrl')
 
 
 
